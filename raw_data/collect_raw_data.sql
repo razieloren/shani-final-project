@@ -9,4 +9,5 @@ LEFT JOIN musicbrainz.release_group AS rg ON rg.id = r.release_group
 LEFT JOIN musicbrainz.artist_credit_name AS acn ON acn.artist_credit = rg.artist_credit
 LEFT JOIN musicbrainz.artist AS a ON a.id = acn.artist
 LEFT JOIN musicbrainz.release_group_secondary_type_join AS rgstj ON rgstj.release_group = rg.id
-WHERE rg.type = 1 AND rgstj.secondary_type IS NULL AND a.name NOT LIKE 'Various Artists' AND rc.date_year IS NOT NULL;
+WHERE rg.type = 1 AND rgstj.secondary_type IS NULL AND a.name NOT LIKE 'Various Artists' AND IFNULL(rc.date_year, 0) >= 1970;
+-- Add rating through _meta tabels (Number of stars X number of reviews)

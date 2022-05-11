@@ -2,6 +2,7 @@
 
 import csv
 import time
+import string
 import sqlite3
 import argparse
 
@@ -35,6 +36,13 @@ def main():
         next(csv_reader)
         for row in csv_reader:
             gid, album, artist, release_year = row
+            should_skip = False
+            for c in artist + album:
+                if c not in string.printable:
+                    should_skip = True
+                    break
+            if should_skip:
+                continue
             if gid not in albums:
                 albums[gid] = {
                     'gid': gid,
