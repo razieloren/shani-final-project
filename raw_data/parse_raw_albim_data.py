@@ -48,10 +48,24 @@ def main():
             if len(albums) == next_print:
                 print(f'Parsed {len(albums)} albums in {round(time.time() - start, 2)} seconds')
                 next_print += 50000
+    albums_unique = {}
+    for gid, values in albums_unique.items():
+        key = f'{values["album"]}__{values["artist"]}'
+        if key not in albums_unique:
+            albums_unique[key] = {
+                'gid': gid,
+                'album': values['album'],
+                'artist': values['artist'],
+                'release_year': values['release_year']
+            }
+        else:
+            if values['release_year'] < albums_unique[key]['release_year']:
+                albums_unique[key]['gid'] = values['gid']
+                albums_unique[key]['release_year'] = values['release_year']
     with sqlite3.connect(args.output) as conn:
         prepare_tables(conn)
         cur = conn.cursor()
-        for _, values in albums.items():
+        for _, values in albums_unique.items():
             cur.execute(f'''
                 INSERT INTO album (gid, name, artist, release_year)
                 VALUES (?, ?, ?, ?);
