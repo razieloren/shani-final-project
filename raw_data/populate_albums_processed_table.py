@@ -141,22 +141,6 @@ def main():
                 two = abs(y3 - y2)
                 text_area += one * two
             text_ratio = min(1, text_area / image_area)
-            '''
-                        gid TEXT PRIMARY KEY,
-            cover_area INTEGER NOT NULL,
-            red INTEGER,
-            green INTEGER,
-            blue INTEGER,
-            face_ratio REAL,
-            is_joy INTEGER,
-            is_sorrow INTEGER,
-            is_anger INTEGER,
-            is_surprised INTEGER,
-            is_blurred INTEGER,
-            first_label TEXT,
-            second_label TEXT,
-            third_label TEXT,
-            text_ratio REAL'''
             cur.execute('''
                 INSERT INTO album_processed (gid, cover_area, red, green, blue, face_ratio, is_joy, is_sorrow, is_anger, is_surprised, is_blurred, first_label, second_label, third_label, text_ratio)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
