@@ -1,2 +1,5 @@
 raw_data/raw_album_data.csv
 raw_data/albums.sqlite
+raw_data/musicscanner*
+raw_data/vision.json
+
