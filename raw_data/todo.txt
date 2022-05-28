@@ -1,0 +1,11 @@
+- Labels: true / false (9 labels) -> Reduce to 6 according to "most valueable"
+    Photography, drawing, musical, fashion, urban, geometric
+- Text ratio / location (maybe title?)
+- Face / Object -> Person ratio
+- Colors: precentage only / dominant color
+
+
+- Points to ratios
+- Objects not faces
+- Neighbour functions
+- Generate images (labels, rectangles)
