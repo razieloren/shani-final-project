@@ -1,3 +1,5 @@
 raw_data/artifacts
 raw_data/musicscanner*
+__pycache__/
+venv/
 
