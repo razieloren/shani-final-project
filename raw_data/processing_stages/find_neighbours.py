@@ -4,8 +4,6 @@ import math
 import sqlite3
 import argparse
 
-from operator import itemgetter
-
 BIGGEST_COLOR_DISTANCE = math.sqrt(math.pow(255, 2) + math.pow(255, 2) + math.pow(255, 2))
 
 def parse_args():
@@ -85,7 +83,7 @@ def calc_neighbour_score(a1, a2):
     return total
 
 class Album(object):
-    def __init__(self, gid, colors, faces, persons, text_blocks, urban, musical, geometric, fashion, drawing, photography, face_ratio, text_ratio, persons_ratio):
+    def __init__(self, gid, colors, faces, persons, text_blocks, urban, musical, geometric, fashion, drawing, photography, face_ratio, text_ratio, persons_ratio, big_thumbnail):
         self.gid = gid
         self.colors = [] if colors is None else [list(map(float, e.split(','))) for e in colors.split('|')]
         self.faces = [] if faces is None else [list(map(float, e.split(','))) for e in faces.split('|')]
@@ -100,42 +98,81 @@ class Album(object):
         self.face_ratio = face_ratio
         self.text_ratio = text_ratio
         self.persons_ratio = persons_ratio
+        self.big_thumbnail = big_thumbnail
         self.ns = []
 
-def main():
-    args = parse_args()
-    with sqlite3.connect(args.db) as conn:
+def find_neighbours(gid, amount_of_neighbours=10):
+    neighbours = []
+    selected_album = None
+    with sqlite3.connect('../artifacts/albums_no_imgs.sqlite') as conn:
         cur = conn.cursor()
         cur.execute(f'''
-            SELECT gid, colors, faces, persons, text_blocks, urban, musical, geometric, fashion, drawing, photography, face_ratio, text_ratio, persons_ratio
+            SELECT gid, colors, faces, persons, text_blocks, urban, musical, geometric, fashion, drawing, photography, face_ratio, text_ratio, persons_ratio, big_thumbnail
+            FROM album_processed3
+            WHERE gid = ?
+        ''', (gid, ))
+        album = cur.fetchall()
+        if len(album) == 0:
+            raise RuntimeError('No such GID')
+        gid, colors, faces, persons, text_blocks, urban, musical, geometric, fashion, drawing, photography, face_ratio, text_ratio, persons_ratio, big_thumbnail = album[0]
+        selected_album = Album(gid, colors, faces, persons, text_blocks, urban, musical, geometric, fashion, drawing, photography, face_ratio, text_ratio, persons_ratio, big_thumbnail)
+        cur.execute(f'''
+            SELECT gid, colors, faces, persons, text_blocks, urban, musical, geometric, fashion, drawing, photography, face_ratio, text_ratio, persons_ratio, big_thumbnail
             FROM album_processed3
         ''')
         albums = []
         for album in cur.fetchall():
-            gid, colors, faces, persons, text_blocks, urban, musical, geometric, fashion, drawing, photography, face_ratio, text_ratio, persons_ratio = album
-            albums.append(Album(gid, colors, faces, persons, text_blocks, urban, musical, geometric, fashion, drawing, photography, face_ratio, text_ratio, persons_ratio))
-        neighbours = {}
-        for j, album1 in enumerate(albums[:600]):
-            print(j)
-            neighbours[album1.gid] = []
-            for album2 in albums[:600]:
-                if album1.gid != album2.gid:
-                    score = calc_neighbour_score(album1, album2)
-                    if len(neighbours[album1.gid]) == 0:
-                        neighbours[album1.gid].append((album2.gid, score))
-                    else:
-                        for i, element in enumerate(neighbours[album1.gid]):
-                            if score < element[1]:
-                                neighbours[album1.gid].insert(i, (album2.gid, score))
-                                break
-                        if len(neighbours[album1.gid]) > 10:
-                            neighbours[album1.gid].pop()
+            gid, colors, faces, persons, text_blocks, urban, musical, geometric, fashion, drawing, photography, face_ratio, text_ratio, persons_ratio, big_thumbnail = album
+            albums.append(Album(gid, colors, faces, persons, text_blocks, urban, musical, geometric, fashion, drawing, photography, face_ratio, text_ratio, persons_ratio, big_thumbnail))
+        neighbours = []
+        for album in albums:
+            if selected_album.gid != album.gid:
+                score = calc_neighbour_score(selected_album, album)
+                if len(neighbours) == 0:
+                    neighbours.append((album, score))
+                else:
+                    for i, element in enumerate(neighbours):
+                        if score < element[1]:
+                            neighbours.insert(i, (album, score))
+                            break
+                    if len(neighbours) > amount_of_neighbours:
+                        neighbours.pop()
+        return selected_album, neighbours
 
-        for album, nei in neighbours.items():
-            print(album)
-            for n in nei:
-                print('\t', n)
+# def main():
+#     args = parse_args()
+#     with sqlite3.connect(args.db) as conn:
+#         cur = conn.cursor()
+#         cur.execute(f'''
+#             SELECT gid, colors, faces, persons, text_blocks, urban, musical, geometric, fashion, drawing, photography, face_ratio, text_ratio, persons_ratio, big_thumbnail
+#             FROM album_processed3
+#         ''')
+#         albums = []
+#         for album in cur.fetchall():
+#             gid, colors, faces, persons, text_blocks, urban, musical, geometric, fashion, drawing, photography, face_ratio, text_ratio, persons_ratio, big_thumbnail = album
+#             albums.append(Album(gid, colors, faces, persons, text_blocks, urban, musical, geometric, fashion, drawing, photography, face_ratio, text_ratio, persons_ratio, big_thumbnail))
+#         neighbours = {}
+#         for j, album1 in enumerate(albums[:600]):
+#             print(j)
+#             neighbours[album1.gid] = []
+#             for album2 in albums[:600]:
+#                 if album1.gid != album2.gid:
+#                     score = calc_neighbour_score(album1, album2)
+#                     if len(neighbours[album1.gid]) == 0:
+#                         neighbours[album1.gid].append((album2.gid, score))
+#                     else:
+#                         for i, element in enumerate(neighbours[album1.gid]):
+#                             if score < element[1]:
+#                                 neighbours[album1.gid].insert(i, (album2.gid, score))
+#                                 break
+#                         if len(neighbours[album1.gid]) > 10:
+#                             neighbours[album1.gid].pop()
+
+#         for album, nei in neighbours.items():
+#             print(album)
+#             for n in nei:
+#                 print('\t', n)
             
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()

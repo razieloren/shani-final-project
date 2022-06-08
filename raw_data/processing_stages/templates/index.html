@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Syncover Neighbours</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+  </head>
+  <body>
+    <div class="container">
+        <h1>Find neighbours for you favorite albums.</h1>
+        <form method="post">
+            <div class="form-group m-2">
+              <input type="text" class="form-control" name="albumGid" placeholder="GID">
+            </div>
+            <div class="m-2">
+                <button type="submit" class="btn btn-primary">Find!</button>
+            </div>
+        </form>
+        {% if selected_album %}
+        <div class="m-4">
+            <h3>{{ selected_album.gid }}</h3>
+            <img src="{{ selected_album.big_thumbnail }}" width="250" height="250">
+        </div>
+        <h4>Neighbours:</h4>
+        {% for elem in neighbours %}
+        <div class="m-2">
+            <h3>{{ elem[0].gid }} ({{ elem[1] }})</h3>
+            <img src="{{ elem[0].big_thumbnail }}" width="200" height="200">
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+  </body>
+</html>
